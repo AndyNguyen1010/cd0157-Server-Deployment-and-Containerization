@@ -1,0 +1,1 @@
+arn:aws:iam::411372488123:role/UdacityFlaskDeployCBKubectlRole
