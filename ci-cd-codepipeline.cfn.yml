@@ -24,7 +24,7 @@ Parameters:
 
   GitBranch:
     Type: String
-    Default: master
+    Default: main
     Description: GitHub git repository branch - change triggers a new build
     MinLength: 1
     MaxLength: 100
@@ -40,7 +40,7 @@ Parameters:
 
   GitHubUser:
     Type: String
-    Default: SudKul
+    Default: AndyNguyen1010
     Description: GitHub username or organization
     MinLength: 3
     MaxLength: 100
@@ -120,6 +120,7 @@ Resources:
           import json
           import boto3
           import urllib3
+          from botocore.vendored import requests
           def handler(event, context):
             response = {
               'Status': 'SUCCESS',
@@ -130,9 +131,9 @@ Resources:
               'LogicalResourceId': event['LogicalResourceId'],
               'Data': {"Message": "Resource creation successful!"},
             }
-          
-            http = urllib3.PoolManager()
+
             client = boto3.client('iam')
+            http = urllib3.PoolManager()
             try:
               if event['RequestType'] == 'Create':
                 kubectl_role_name = event['ResourceProperties']['KubectlRoleName']
@@ -156,11 +157,12 @@ Resources:
               response['Data'] = {"Message": "Resource creation failed"}
 
             response_body = json.dumps(response)
-            headers = {'Content-Type': 'application/json', "content-length": str(len(response_body)) }
-            put_response = http.request('PUT',
-                          event['ResponseURL'],
-                          body = response_body,
-                          headers=headers)
+            headers = {'content-type': '', "content-length": str(len(response_body)) }
+            put_response = http.request('POST',
+                        event['ResponseURL'],
+                        body = response_body,
+                        headers=headers,
+                        retries = False)
             return response
 
       Handler: index.handler
